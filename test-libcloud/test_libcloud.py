@@ -30,7 +30,7 @@ def get_next_node_name(nodes):
     next_id += 1
     return node_prefix + next_id
 
-def get_next_n_node_names(nodes):
+def get_next_n_node_names(nodes, desired_min):
     next_id = 0
     for node in nodes:
         m = NODE_RE.match(node)
@@ -44,6 +44,11 @@ def get_next_n_node_names(nodes):
     for i in xrange(len(nodes)):
         next_id += 1
         new_nodes.append(node_prefix + str(next_id))
+
+    if len(new_nodes) < desired_min:
+        for i in xrange(desired_min-len(new_nodes)):
+            next_id += 1
+            new_nodes.append(node_prefix + str(next_id))
 
     return new_nodes
 
@@ -92,16 +97,16 @@ def main():
                    ex_tenant_name='demo')
 
     current_nodes = get_nodes(driver)
-    new_nodes = get_next_n_node_names(current_nodes)
+    new_nodes = get_next_n_node_names(current_nodes, desired_number_of_nodes)
 
     img = get_image(driver)
     sze = get_size(driver)
 
-    i = 0
     for c in current_nodes:
         delete_node(driver, c)
-        create_node(driver, new_nodes[i], img, sze)
-        i += 1
+
+    for c in new_nodes:
+        create_node(driver, c, img, sze)
 
 if __name__ == '__main__':
     main()
